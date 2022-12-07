@@ -26,7 +26,7 @@
 
 
         // Size ?
-        var width = 460
+        var width = 800
         var height = 400
 
         // The svg
@@ -40,7 +40,7 @@
             // [long,lat] coordinats
             .center([-74, 4])       // GPS of location to zoom on
             .scale(1020)             // This is like the zoom
-            .translate([width / 2, height / 2])
+            .translate([width / 4, height / 2])
 
 
         // Create data for circles:
@@ -130,6 +130,57 @@
                 .on("mouseleave", mouseleave)
 
         })
+
+
+        // LEGEND //
+        ////////////
+
+        // The scale you use for bubble size
+        var sizeLegend = d3.scaleSqrt()
+            .domain([1, 100])  // What's in the data, let's say it is percentage
+            .range([1, 100])  // Size in pixel
+
+        // Add legend: circles
+        var valuesToShow = [10, 20, 30]
+        var xCircle = width / 1.5
+        var xLabel = 420
+        var yCircle = 330
+        svg
+            .selectAll("legend")
+            .data(valuesToShow)
+            .enter()
+            .append("circle")
+            .attr("cx", xCircle)
+            .attr("cy", function (d) { return yCircle - sizeLegend(d) })
+            .attr("r", function (d) { return sizeLegend(d) })
+            .style("fill", "none")
+            .attr("stroke", "black")
+
+        // Add legend: segments
+        svg
+            .selectAll("legend")
+            .data(valuesToShow)
+            .enter()
+            .append("line")
+            .attr('x1', function (d) { return xCircle - sizeLegend(d) })
+            .attr('x2', xLabel)
+            .attr('y1', function (d) { return yCircle - sizeLegend(d) })
+            .attr('y2', function (d) { return yCircle - sizeLegend(d) })
+            .attr('stroke', 'black')
+            .style('stroke-dasharray', ('2,2'))
+
+        // Add legend: labels
+        svg
+            .selectAll("legend")
+            .data(valuesToShow)
+            .enter()
+            .append("text")
+            .attr('x', xLabel - 15)
+            .attr('y', function (d) { return yCircle - sizeLegend(d) })
+            .text(function (d) { return d })
+            .style("font-size", 12)
+            .attr('alignment-baseline', 'middle')
+
 
 
     </script>
