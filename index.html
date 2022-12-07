@@ -5,6 +5,20 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <style>
+        #menu_container {
+            position: fixed;
+            top: 100;
+            left: 400px;
+            display: flex;
+            justify-content: flex-end;
+
+        }
+
+        label {
+            margin-right: 15px;
+        }
+    </style>
 </head>
 
 <body>
@@ -12,8 +26,16 @@
     <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
     <script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
 
+
     <!-- Create an element where the map will take place -->
-    <div id="my_dataviz"></div>
+    <!-- And button -->
+    <div id="my_dataviz">
+        <div id="menu_container">
+            <input type="checkbox" id="bogota" class="checkbox" value="A" checked><label>Bogotá</label>
+            <input type="checkbox" class="checkbox" value="B" checked><label>Barranquilla</label>
+            <input type="checkbox" class="checkbox" value="C" checked><label>Medellín</label>
+        </div>
+    </div>
 
     <style>
         .circle:hover {
@@ -35,6 +57,9 @@
             .attr("width", width)
             .attr("height", height)
 
+        var checkbox = d3.select("#my_dataviz")
+            .app
+
         // Map and projection
         var projection = d3.geoMercator()
             // [long,lat] coordinats
@@ -45,9 +70,9 @@
 
         // Create data for circles:
         var markers = [
-            { long: -74.08175, lat: 4.60971, name: "Bogotá", group: "A", size: 30 },
-            { long: -74.78132, lat: 10.96854, name: "Medellín", group: "B", size: 20 },
-            { long: -75.56359, lat: 6.25184, name: "Barranquilla", group: "C", size: 10 },
+            { long: -74.08175, lat: 4.60971, name: "Bogotá", group: "A", size: 40 },
+            { long: -74.78132, lat: 10.96854, name: "Barranquilla", group: "B", size: 10 },
+            { long: -75.56359, lat: 6.25184, name: "Medellín", group: "C", size: 20 },
         ];
 
         // Load external data and boot
@@ -117,10 +142,10 @@
                 .data(markers)
                 .enter()
                 .append("circle")
+                .attr("class", function (d) { return d.group })
                 .attr("cx", function (d) { return projection([d.long, d.lat])[0] })
                 .attr("cy", function (d) { return projection([d.long, d.lat])[1] })
                 .attr("r", function (d) { return size(d.size) })
-                .attr("class", "circle")
                 .style("fill", function (d) { return color(d.group) })
                 .attr("stroke", "#69b3a2")
                 .attr("stroke-width", 3)
@@ -128,6 +153,34 @@
                 .on("mouseover", mouseover)
                 .on("mousemove", mousemove)
                 .on("mouseleave", mouseleave)
+
+
+
+
+            // This function is gonna change the opacity and size of selected and unselected circles
+            function update() {
+
+                // For each check box:
+                d3.selectAll(".checkbox").each(function (d) {
+                    cb = d3.select(this);
+                    grp = cb.property("value")
+
+                    // If the box is check, I show the group
+                    if (cb.property("checked")) {
+                        svg.selectAll("." + grp).transition().duration(500).style("opacity", 1).attr("r", function (d) { return size(d.size) })
+
+                        // Otherwise I hide it
+                    } else {
+                        svg.selectAll("." + grp).transition().duration(500).style("opacity", 0).attr("r", 0)
+                    }
+                })
+            }
+
+            // When a button change, I run the update function
+            d3.selectAll(".checkbox").on("change", update);
+
+            // And I initialize it at the beginning
+            update()
 
         })
 
@@ -144,7 +197,7 @@
         var valuesToShow = [10, 20, 30]
         var xCircle = width / 1.5
         var xLabel = 420
-        var yCircle = 330
+        var yCircle = 300
         svg
             .selectAll("legend")
             .data(valuesToShow)
